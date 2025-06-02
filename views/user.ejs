@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+    <link href="/fontawesome/css/all.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="card text-left">
+            <div class="card-header text-center">
+                <h1>MongoDB BREADS(Browse, Read, Edit, Add, Delete, Sort)</h1>
+            </div>
+            <form>
+
+
+                <div class="col-sm-1 col-form-label">
+                    <span class="input-group-text">Show</span>
+                    <select type="text" id="showData" class="form-control" aria-label="Default select example">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="0">All</option>
+                    </select>
+                    <span class="input-group-text">entries</span>
+                </div>
+
+
+
+                <div class="input-group w-75 float-end">
+                    <input type="text" class="form-control" placeholder="Search" aria-label="Recipient’s username"
+                        aria-describedby="button-addon2">
+                    <button class="btn btn-outline-secondary rounded-2" type="button" id="button-addon2"><i
+                            class="fa-solid fa-magnifying-glass"></i></button>
+                    <button class="btn btn-outline-warning rounded-2"><i class="fa-solid fa-rotate"></i></button>
+                </div>
+
+                <div class="card-body">
+
+                    <table id="table-data" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-content">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer text-body-secondary">
+                    <button type="button" class="btn btn-primary py-1"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+<script>
+    const loadData = async () => {
+        const response = await fetch("http://localhost:3000/users", {
+            method: "GET"
+        });
+
+        const users = await response.json();
+
+        let html = '';
+
+        users.forEach((user, index) => {
+            html += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${user.name}</td>
+                <td>${user.phone}</td>
+                <td>
+                    <button type="button" class="btn btn-success py-1"><i class="fa-solid fa-pencil"></i></button>
+                    <button type="button" class="btn btn-danger py-1"><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" class="btn btn-warning py-1"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </td>
+            </tr>
+            `
+        });
+        document.getElementById('table-content').innerHTML = html;
+    }
+    loadData()
+</script>
+
+</html>
