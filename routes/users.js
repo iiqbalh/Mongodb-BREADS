@@ -39,7 +39,7 @@ module.exports = function (db) {
     try {
       const id = req.params.id
       const {name, phone} = req.body;
-      const user = await User.updateMany({_id: new ObjectId(id)}, {$set: {name: name, phone: phone}});
+      const user = await User.updateOne({_id: new ObjectId(id)}, {$set: {name: name, phone: phone}});
       res.status(201).json(user)
     } catch (e) {
       res.status(500).json({ message: e.message })
@@ -49,7 +49,8 @@ module.exports = function (db) {
   router.delete('/:id', async function (req, res, next) {
     try {
       const id = req.params.id
-      const user = await User.deleteMany({_id: new ObjectId(id)});
+      const user = await User.deleteOne({_id: new ObjectId(id)});
+      if(!user) throw new Error("User not exist")
       res.status(201).json(user)
     } catch (e) {
       res.status(500).json({ message: e.message })
