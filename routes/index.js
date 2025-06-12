@@ -6,10 +6,9 @@ router.get('/', function(req, res, next) {
   res.render('user');
 });
 
-router.get('/:id/todos', function(req, res, next) {
-  const params = req.query
-  console.log(params)
-  res.render('user');
+router.get('/users/:id/todos', function(req, res, next) {
+  const id = req.params.id;
+  res.render('todos', {executor: id});
 });
 
 module.exports = router;

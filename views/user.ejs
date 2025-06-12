@@ -58,7 +58,7 @@
             </div>
 
             <div class="card-footer text-body-secondary float-start">
-                <button class="btn btn-primary py-1" onclick="editId = null; modalAdd.show()"><i
+                <button class="btn btn-primary py-1" onclick="editId = null;modalAdd.show()"><i
                         class="fa-solid fa-plus"></i></button>
 
                 <!-- pagination -->
@@ -101,7 +101,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="editId = null">Close</button>
                     <button type="button" class="btn btn-primary" onclick="saveData()">Save changes</button>
                 </div>
             </div>
@@ -169,7 +169,8 @@
 
     // loadData
     const loadData = async () => {
-        const searchParams = new URLSearchParams(params);
+        try{
+            const searchParams = new URLSearchParams(params);
         const response = await fetch(`http://localhost:3000/users?${searchParams}`, {
             method: "GET"
         });
@@ -186,7 +187,7 @@
                 <td>
                     <button type="button" onClick="showEdit('${user._id}')" class="btn btn-success py-1"><i class="fa-solid fa-pencil"></i></button>
                     <button type="button" onClick="showDelete('${user._id}')" class="btn btn-danger py-1"><i class="fa-solid fa-trash"></i></button>
-                    <button type="button" class="btn btn-warning py-1"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    <a href="/users/${user._id}/todos" class="btn btn-warning py-1"><i class="fa-solid fa-right-from-bracket"></i></a>
                 </td>
             </tr>
             `
@@ -196,11 +197,15 @@
         params = { ...params, page: users.page, pages: users.pages };
         buildHeaderTable()
         buildPagination(users)
+        } catch(e) {
+            console.log(e, "data gagal diload")
+        }
     };
 
     // editData
     const showEdit = async (id) => {
-        editId = id;
+        try{
+            editId = id;
         const response = await fetch(`http://localhost:3000/users/${editId}`, {
             method: "GET"
         });
@@ -208,15 +213,19 @@
         document.getElementById('name').value = user.name;
         document.getElementById('phone').value = user.phone;
         modalAdd.show();
+        } catch(e) {
+            console.log(e, "data gagal diedit")
+        }
     }
 
     // saveData
     const saveData = async () => {
-        const name = document.getElementById('name').value;
+        try{
+            const name = document.getElementById('name').value;
         const phone = document.getElementById('phone').value;
+
         let url = "http://localhost:3000/users";
-        if (editId) url = `http://localhost:3000/users/${editId}`
-        console.log(url)
+        if (editId) url = `http://localhost:3000/users/${editId}`;
 
         const response = await fetch(url, {
             method: editId ? "PUT" : "POST",
@@ -230,6 +239,9 @@
         document.getElementById('phone').value = "";
         loadData();
         modalAdd.hide();
+        } catch(e) {
+            console.log(e, "data gagal ditambah")
+        }
     }
 
     document.getElementById('add-user').addEventListener('submit', function (e) {
@@ -239,7 +251,8 @@
 
     // deleteData
     const deleteData = async () => {
-        const response = await fetch(`http://localhost:3000/users/${deleteId}`, {
+        try{
+            const response = await fetch(`http://localhost:3000/users/${deleteId}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
@@ -248,6 +261,9 @@
 
         loadData();
         modalDelete.hide();
+        } catch(e) {
+            console.log(e, "data gagal dihapus")
+        }
     }
 
     const buildPagination = (users) => {

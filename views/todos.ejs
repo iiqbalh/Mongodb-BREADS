@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB BREADS(Browse, Read, Edit, Add, Delete, Sort)</title>
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+    <link href="/fontawesome/css/all.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card text-left">
+            <div class="card-header text-center">
+                <h3>Todo List</h3>
+            </div>
+
+            <div class="card-body">
+                <div class="row mb-3">
+                    <label for="title" class="col-sm-2 col-form-label">Title</label>
+                    <div class="col-sm-10">
+                        <input type="text" name="title" id="title" class="form-control" placeholder="insert your title"
+                            value="">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label for="deadline" class="col-sm-2 col-form-label">Deadline</label>
+                    <div class="col-sm-4">
+                        <input type="date" name="stardate" id="stardate" class="form-control" value="">
+                    </div>
+                    <div class="col-sm-2 text-center">
+                        <p>s.d</p>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="date" name="enddate" id="enddate" class="form-control" value="">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label for="complete" class="col-sm-2 col-form-label">Complete</label>
+                    <div class="col-sm-10">
+                        <select name="complete" id="complete" class="form-control">
+                            <option disabled selected>-select complete-</option>
+                            <option value="false">Not Yet</option>
+                            <option value="true">Done</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="row mb-3">
+                    <div class="col-sm-2">
+                        <button class="btn btn-success"><i class="fa-solid fa-sort"></i> sort by deadline</button>
+                    </div>
+                    <div class="col-sm-2">
+                        <button class="btn btn-warning rounded-2"><i class="fa-solid fa-rotate">
+                            </i></button>
+                        <button class="btn btn-info rounded-2" type="button" id="button-addon2">
+                            <i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                </div>
+
+                <form id="add-todo" class="mt-3 mx-3">
+
+                    <div class="row">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="add-title" placeholder="Title"
+                                aria-label="Recipient’s username" aria-describedby="button-addon2">
+                            <button class="btn btn-outline-primary rounded-2" type="submit" id="button-addon2"><i
+                                    class="fa-sharp fa-solid fa-circle-down"></i></button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div id="showTodos"></div>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="modal" tabindex="-1" id="modal-edit">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="edit-todo">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update Todo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <label for="title" class="col-sm-2 col-form-label">Title</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="title" id="edit-title" class="form-control" value="" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="deadline" class="col-sm-2 col-form-label">Deadline</label>
+                            <div class="col-sm-10">
+                                <input type="datetime-local" name="deadline" id="edit-deadline" class="form-control"
+                                    value="" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="complete" class="col-sm-2 col-form-label">Complete</label>
+                            <div class="col-sm-10 mt-2">
+                                <input type="checkbox" id="edit-complete" name="complete"> done
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- modal-delete -->
+    <div class="modal" tabindex="-1" id="modal-delete">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary" onclick="deleteData()">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    var modalEdit = new bootstrap.Modal(document.getElementById('modal-edit'));
+    var modalDelete = new bootstrap.Modal(document.getElementById('modal-delete'));
+    var deleteId = null;
+    var editId = null;
+    let query = '';
+    var executor = '<%=executor%>';
+
+    let params = {
+        sortBy: '_id',
+        sortMode: 'desc'
+    }
+
+    const showDelete = (id) => {
+        deleteId = id;
+        modalDelete.show()
+    }
+
+    $(document).ready(function () {
+        $('#edit-todo').submit((e) => {
+            e.preventDefault();
+            editData()
+        })
+
+        $('#add-todo').submit(function (e) {
+            e.preventDefault();
+            addData()
+        })
+
+        loadData();
+    });
+
+
+    //loadData
+    const loadData = async () => {
+        $.ajax({
+            method: "GET",
+            url: `http://localhost:3000/todos`,
+            data: {
+                executor,
+            },
+            dataType: "json"
+        }).done((todos) => {
+            let html = ''
+
+            todos.data.forEach((todo, index) => {
+                html += `
+            <div id="${todo._id}" class="mt-3 d-flex justify-content-between ${todo.complete == false && new Date(`${todo.deadline}`).getTime() < new Date().getTime() ? ' alert alert-danger' : todo.complete == true ? ' alert alert-success' : ' alert alert-secondary'}" role="alert">
+                ${moment(todo.deadline).format('DD-MM-YYYY HH:mm')} ${todo.title}
+                <div>
+                    <a type="button" onclick="showEdit('${todo._id}')" data-bs-toggle="modal" data-bs-target="#edit"><i class="fa-solid fa-pencil"></i></a>
+                    <a type="button" onclick="showDelete('${todo._id}')" data-bs-toggle="modal" data-bs-target="#delete"><i class="fa-solid fa-trash mx-2"></i></a>
+                </div>
+            </div>
+                `
+                $('#showTodos').html(html);
+            });
+        }).fail(() => {
+            alert('gagal load data')
+        });
+    };
+
+
+    // addData
+    const addData = async () => {
+        const title = $('#add-title').val();
+
+        $.ajax({
+            method: "POST",
+            url: "http://localhost:3000/todos",
+            data: {
+                title,
+                executor
+            },
+            dataType: 'json'
+        }).done((todo) => {
+            let html = ''
+
+            html += `
+            <div id="${todo._id}" class="mt-3 d-flex justify-content-between ${todo.complete == false && new Date(`${todo.deadline}`).getTime() < new Date().getTime() ? ' alert alert-danger' : todo.complete == true ? ' alert alert-success' : ' alert alert-secondary'}" role="alert">
+                ${moment(todo.deadline).format('DD-MM-YYYY HH:mm')} ${todo.title}
+                <div>
+                    <a type="button" onclick="showEdit('${todo._id}')" data-bs-toggle="modal" data-bs-target="#edit"><i class="fa-solid fa-pencil"></i></a>
+                    <a type="button" onclick="showDelete('${todo._id}')" data-bs-toggle="modal" data-bs-target="#delete"><i class="fa-solid fa-trash mx-2"></i></a>
+                </div>
+            </div>
+                `
+            $('#showTodos').prepend(html);
+            title = '';
+            $('#title').val('');
+        }).fail(() => {
+            alert('gagal save data')
+        })
+    };
+
+
+    //showData
+    const showEdit = async (id) => {
+        try {
+            editId = id;
+            $.get(`http://localhost:3000/todos/${editId}`, (todo) => {
+                $('#edit-title').val(todo.title);
+                $('#edit-deadline').val(moment(todo.deadline).format('YYYY-MM-DDThh:mm'))
+                $('#edit-complete').prop('checked', todo.complete)
+                modalEdit.show();
+            })
+        } catch (e) {
+            console.log(e, "data gagal ditampilkan")
+        };
+    };
+
+
+    // editData
+    const editData = async () => {
+        title = $('#edit-title').val();
+        deadline = $('#edit-deadline').val()
+        complete = $('#edit-complete').prop('checked')
+
+        $.ajax({
+            method: "PUT",
+            url: `http://localhost:3000/todos/${editId}`,
+            dataType: 'json',
+            data: {
+                executor,
+                title,
+                deadline,
+                complete: JSON.parse(complete)
+            }
+        }).done((todo) => {
+            let html = ''
+
+            html += `
+            ${moment(deadline).format('DD-MM-YYYY HH:mm')} ${title}
+                <div>
+                    <a type="button" onclick="showEdit('${todo._id}')" data-bs-toggle="modal" data-bs-target="#edit"><i class="fa-solid fa-pencil"></i></a>
+                    <a type="button" onclick="showDelete('${todo._id}')" data-bs-toggle="modal" data-bs-target="#delete"><i class="fa-solid fa-trash mx-2"></i></a>
+                </div> 
+                `
+            $(`#${todo._id}`).attr('class', `d-flex justify-content-between ${todo.complete == false && new Date(`${todo.deadline}`).getTime() < new Date().getTime() ? ' alert alert-danger' : todo.complete == true ? ' alert alert-success' : ' alert alert-secondary'}`).html(html);
+            if ($('#edit-complete').val()) complete = $('#edit-complete').val();
+            else complete = '';
+
+            modalEdit.hide();
+            loadData();
+        }).fail(() => {
+            alert('gagal save data');
+        })
+    };
+
+
+    // deleteData
+    const deleteData = async () => {
+        try {
+            $.ajax({
+                method: "DELETE",
+                url: `http://localhost:3000/todos/${deleteId}`
+            }).done(() => {
+                loadData();
+                modalDelete.hide();
+            });
+        } catch (e) {
+            console.log(e, "data gagal dihapus")
+        }
+    }
+
+</script>
+
+</html>
