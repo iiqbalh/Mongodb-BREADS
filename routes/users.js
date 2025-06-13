@@ -26,6 +26,7 @@ module.exports = function (db) {
       // sorting
       const sortParams = {};
       sortParams[sortBy] = sortMode === 'asc' ? 1 : -1;
+      console.log(params)
 
       const users = await User.find(params).sort(sortParams).limit(limit).skip(offset).toArray();
       res.status(200).json({

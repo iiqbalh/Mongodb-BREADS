@@ -1,4 +1,5 @@
 var express = require('express');
+const moment = require('moment');
 const { ObjectId } = require('mongodb');
 var router = express.Router();
 
@@ -8,14 +9,44 @@ module.exports = function (db) {
 
     router.get('/', async function (req, res, next) {
         try {
-            const {executor} = req.query
+            const { page = 1, executor, query = '', sortBy = '_id', sortMode = 'desc', limit = 10 } = req.query
+            console.log(sortBy)
+
             const params = {}
+
+            if (query.title) params['title'] = new RegExp(query.title, 'i')
+
+            if (query.stardate && query.enddate) {
+                params['deadline'] = {
+                    $gte: new Date(query.stardate),
+                    $lte: new Date(query.enddate)
+                }
+            } else if (query.stardate) {
+                params['deadline'] = {$gte: new Date(query.stardate)}
+            } else if (query.enddate) {
+                params['deadline'] = {$lte: new Date(query.enddate)}
+            }
+
+            if (query.complete) params['complete'] = JSON.parse(query.complete);
 
             if (executor) params['executor'] = new ObjectId(executor)
 
-            const todos = await Todo.find(params).toArray();
+            // sorting
+            const sortParams = {};
+            sortParams[sortBy] = sortMode === 'asc' ? 1 : -1;
+
+            const offset = (page - 1) * limit;
+            const count = await Todo.countDocuments(params);
+            const pages = Math.ceil(count / limit);
+
+            const todos = await Todo.find(params).sort(sortParams).limit(limit).skip(offset).toArray();
             res.status(200).json({
-                data: todos
+                data: todos,
+                page: Number(page),
+                pages: Number(pages),
+                limit: limit,
+                offset: offset,
+                count: count
             })
         } catch (e) {
             res.status(500).json({ message: e.message })
